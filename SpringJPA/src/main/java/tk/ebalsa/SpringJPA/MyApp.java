@@ -1,9 +1,10 @@
 package tk.ebalsa.SpringJPA;
 
-import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.H2;
-
+import java.sql.SQLException;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -12,43 +13,60 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import org.springframework.orm.hibernate3.HibernateExceptionTranslator;
 import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.ComponentScan;
 
 @Configuration
-@EnableJpaRepositories
+@EnableJpaRepositories(basePackages = "tk.ebalsa.SpringJPA",
+includeFilters = @ComponentScan.Filter(value = {BookRepository.class}, type = FilterType.ASSIGNABLE_TYPE))
+@EnableTransactionManagement
 public class MyApp {
 
     @Bean
-    public DataSource dataSource() {
-        return new EmbeddedDatabaseBuilder().setType(H2).build();
+    public DataSource dataSource() throws SQLException {
+
+        EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
+        return builder.setType(EmbeddedDatabaseType.H2).build();
+      }
+
+    @Bean
+    public EntityManagerFactory entityManagerFactory() throws SQLException {
+
+      HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+      vendorAdapter.setGenerateDdl(true);
+
+      LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
+      factory.setJpaVendorAdapter(vendorAdapter);
+      factory.setPackagesToScan("tk.ebalsa.SpringJPA");
+      factory.setDataSource(dataSource());
+      factory.afterPropertiesSet();
+
+      return factory.getObject();
     }
 
     @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource, JpaVendorAdapter jpaVendorAdapter) {
-        LocalContainerEntityManagerFactoryBean lef = new LocalContainerEntityManagerFactoryBean();
-        lef.setDataSource(dataSource);
-        lef.setJpaVendorAdapter(jpaVendorAdapter);
-        lef.setPackagesToScan("tk.ebalsa.SpringJPA");
-        return lef;
+    public EntityManager entityManager(EntityManagerFactory entityManagerFactory) {
+      return entityManagerFactory.createEntityManager();
     }
 
     @Bean
-    public JpaVendorAdapter jpaVendorAdapter() {
-        HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
-        hibernateJpaVendorAdapter.setShowSql(false);
-        hibernateJpaVendorAdapter.setGenerateDdl(true);
-        hibernateJpaVendorAdapter.setDatabase(Database.H2);
-        return hibernateJpaVendorAdapter;
-    }
+    public PlatformTransactionManager transactionManager() throws SQLException {
 
+      JpaTransactionManager txManager = new JpaTransactionManager();
+      txManager.setEntityManagerFactory(entityManagerFactory());
+      return txManager;
+    }
+    
     @Bean
-    public PlatformTransactionManager transactionManager() {
-        return new JpaTransactionManager();
+    public HibernateExceptionTranslator hibernateExceptionTranslator() {
+      return new HibernateExceptionTranslator();
     }
 
     public static void main(String[] args) {
@@ -73,7 +91,7 @@ public class MyApp {
 
         // fetch an individual book by ID
         Book book = repository.findOne(1L);
-        System.out.println("Customer found with findOne(1L):");
+        System.out.println("Book found with findOne(1L):");
         System.out.println("--------------------------------");
         System.out.println(book);
         System.out.println();
