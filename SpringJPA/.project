@@ -14,4 +14,11 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>SpringJPA</name>
+			<type>2</type>
+			<location>C:/Users/Usuario/git/SpringJPA/SpringJPA/src/main/java/tk/ebalsa/SpringJPA</location>
+		</link>
+	</linkedResources>
 </projectDescription>
