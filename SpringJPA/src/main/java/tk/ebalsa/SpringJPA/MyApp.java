@@ -56,11 +56,11 @@ public class MyApp {
         BookRepository repository = context.getBean(BookRepository.class);
 
         // save a couple of books
-        repository.save(new Book("title1", "auth1"));
-        repository.save(new Book("Bible", "anonymus"));
-        repository.save(new Book("Quijote", "Cervantes"));
-        repository.save(new Book("Otelo", "Shakespeare"));
-        repository.save(new Book("Chtulu", "Lovecraft"));
+        repository.save(new Book("title1", "auth1", "edit", 50.00));
+        repository.save(new Book("Bible", "anonymus","edit", 80.00));
+        repository.save(new Book("Quijote", "Cervantes","edit", 79.99));
+        repository.save(new Book("Otelo", "Shakespeare","edit", 42.00));
+        repository.save(new Book("Chtulu", "Lovecraft","aaa", 38.38));
 
         // fetch all books
         Iterable<Book> books = repository.findAll();
@@ -73,7 +73,7 @@ public class MyApp {
 
         // fetch an individual book by ID
         Book book = repository.findOne(1L);
-        System.out.println("Customer found with findOne(1L):");
+        System.out.println("Book found with findOne(1L):");
         System.out.println("--------------------------------");
         System.out.println(book);
         System.out.println();
@@ -83,6 +83,14 @@ public class MyApp {
         System.out.println("Book found with Author('Cervantes'):");
         System.out.println("--------------------------------------------");
         for (Book b : Books) {
+            System.out.println(b);
+        }
+        
+        // fetch books by editor @namedQuery
+        List<Book> BooksEdit = repository.findByEdit("edit");
+        System.out.println("Book found with Editor('edit'):");
+        System.out.println("--------------------------------------------");
+        for (Book b : BooksEdit) {
             System.out.println(b);
         }
 

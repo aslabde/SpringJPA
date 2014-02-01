@@ -4,8 +4,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 
 @Entity
+@NamedQuery(name = "Book.findByEdit", query = "SELECT b FROM Book b WHERE LOWER(b.editor) = LOWER(?1)")
 public class Book {
 
 	@Id
@@ -13,12 +15,16 @@ public class Book {
 	private long id;
 	private String title;
 	private String author;
+	private String editor;
+	private double prize;
 	
 	protected Book(){};
 	
-	public Book(String title, String author){
+	public Book(String title, String author, String editor, double prize){
 		this.title=title;
 		this.author=author;
+		this.editor=editor;
+		this.prize=prize;
 	}
 	
 	@Override
@@ -50,6 +56,22 @@ public class Book {
 
 	public void setAuthor(String author) {
 		this.author = author;
+	}
+
+	public String getEditor() {
+		return editor;
+	}
+
+	public void setEditor(String editor) {
+		this.editor = editor;
+	}
+
+	public double getPrize() {
+		return prize;
+	}
+
+	public void setPrize(double prize) {
+		this.prize = prize;
 	}
 	
 }
